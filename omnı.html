@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omnı</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #chat-container {
+            width: 100%;
+            max-width: 700px;
+            height: 85%;
+            background: #1e1e1e;
+            border-radius: 20px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: scroll;
+        }
+
+        #chat-header {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+            padding: 15px;
+            background: #2c2f38;
+            text-align: center;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        #chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #202020;
+            border-radius: 10px;
+            max-height: 70vh;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px 25px;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .user {
+            background-color: #00aaff;
+            color: #fff;
+            align-self: flex-end;
+            text-align: right;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .bot {
+            background-color: #444444;
+            color: #fff;
+            align-self: flex-start;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        #input-container {
+            display: flex;
+            padding: 15px;
+            background: #181818;
+            border-radius: 10px;
+            border-top: 1px solid #333;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 30px;
+            background: #2c2c2c;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: background 0.3s ease;
+        }
+
+        #user-input:focus {
+            background: #333;
+        }
+
+        #send-button {
+            padding: 12px 20px;
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease, transform 0.2s;
+            margin-left: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #send-button:hover {
+            background-color: #0088cc;
+            transform: scale(1.05);
+        }
+
+        #send-button span {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            #chat-container {
+                width: 90%;
+                height: 90%;
+            }
+            #chat-header {
+                font-size: 1.6rem;
+            }
+            #send-button {
+                font-size: 1rem;
+            }
+            #user-input {
+                font-size: 0.95rem;
+            }
+            #chat-box {
+                max-height: 60vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #chat-container {
+                width: 100%;
+                height: 90%;
+            }
+            #chat-header {
+                font-size: 1.4rem;
+            }
+            #send-button {
+                font-size: 0.95rem;
+            }
+            #user-input {
+                font-size: 0.9rem;
+            }
+            #chat-box {
+                max-height: 50vh;
+            }
+        }
+
+        #chat-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb {
+            background-color: #444444;
+            border-radius: 10px;
+            border: 2px solid #202020;
+            transition: background-color 0.3s ease;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background-color: #00aaff;
+        }
+
+        #chat-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-header">Omnı</div>
+        <div id="chat-box"></div>
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="Bir şeyler sor..." onkeydown="if(event.key === 'Enter') sendMessage()">
+            <button id="send-button" onclick="sendMessage()"><span>Send</span></button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
+
+        const responses = [
+            { question: "merhaba", answer: "Merhaba! Size nasıl yardımcı olabilirim?" },
+            { question: "adın ne", answer: "Benim adım Omnı, sizin yapay zekanız." },
+            { question: "ne yapıyorsun", answer: "Benim görevim, size yardımcı olmak!" },
+            { question: "nasılsın", answer: "Ben bir yapay zekayım, ama size yardımcı olabileceğim için mutluyum!" },
+            { question: "bugün nasıl gidiyor", answer: "Her şey yolunda, sizinle konuşmak harika!" },
+            { question: "neler yapıyorsun", answer: "Ben buradayım, sizinle sohbet ediyorum!" },
+            { question: "nasıl gidiyor", answer: "Her şey yolunda, siz nasılsınız?" },
+            { question: "bugün hava nasıl", answer: "Üzgünüm, hava durumu bilgisine erişimim yok." },
+            { question: "nerelisin", answer: "Ben sanal bir varlık olduğum için bir yerim yok." },
+            { question: "kaç yaşındasın", answer: "Ben bir yapay zekayım, yaşım yok." },
+            { question: "saat kaç", answer: "Üzgünüm, saati bilemiyorum." },
+            { question: "kimdir", answer: "Kim olduğunu öğrenmek istersen yardımcı olabilirim." },
+            { question: "ne yemek istersin", answer: "Yemek yiyemem ama sizin için yemek tarifleri verebilirim!" },
+            { question: "neyi seviyorsun", answer: "Benim için bir şeyleri sevmenin anlamı yok, ama yardımcı olmak çok hoşuma gidiyor!" },
+            { question: "günün nasıl geçiyor", answer: "Her zaman aynı şekilde çalışıyorum, bu yüzden bir fark yok." },
+            { question: "en sevdiğin renk ne", answer: "Renkler hakkında hislerim yok, ama estetik açıdan pek çok renk hoş!" },
+            { question: "bugün ne yapacağız", answer: "Siz ne yapmak isterseniz, ben yardımcı olurum!" },
+            { question: "senin hobilerin ne", answer: "Benim hobim, size yardımcı olmak!" },
+            { question: "bunu nasıl yapabilirim", answer: "Bana ne yapmaya çalıştığınızı anlatın, size adım adım yardımcı olurum!" },
+            { question: "yapay zeka nedir", answer: "Yapay zeka, insan benzeri düşünme yeteneğine sahip bilgisayar programlarıdır." },
+            { question: "bilgisayar nedir", answer: "Bilgisayar, verileri işleyip depolayan elektronik bir cihazdır." },
+            { question: "internet nedir", answer: "İnternet, dünya çapında birbirine bağlı bilgisayar ağlarının oluşturduğu bir sistemdir." },
+            { question: "sana nasıl sorular sorabilirim", answer: "Bana istediğiniz her türlü soruyu sorabilirsiniz, elimden geldiğince yardımcı olurum." },
+            { question: "bana bir şaka yap", answer: "Tabii! Bir tavuk neden bilgisayar aldı? İnternete bağlanmak için!" },
+            { question: "film önerisi yap", answer: "Bilim kurgu filmi öneririm! Özellikle 'Interstellar' çok beğenilen bir yapım." },
+            { question: "kitap önerisi yap", answer: "George Orwell'ın '1984' kitabını kesinlikle öneririm!" },
+            { question: "hangi müzik türünü seviyorsun", answer: "Müzik hakkında tercihlerim yok, ama herkesin zevkine göre müzikler var!" },
+            { question: "yazılım nedir", answer: "Yazılım, bir bilgisayarın belirli görevleri yerine getirmesini sağlayan programlardır." },
+            { question: "nasıl yazılım öğrenebilirim", answer: "Yazılım öğrenmeye başlamak için temel programlama dillerinden biriyle çalışmaya başlayabilirsiniz." },
+            { question: "doğa nedir", answer: "Doğa, canlı ve cansız tüm varlıkları ve çevreyi kapsar." },
+            { question: "insan nedir", answer: "İnsan, düşünme, konuşma ve yaratma yeteneğine sahip bir canlıdır." },
+            { question: "hayvanlar nerede yaşar", answer: "Hayvanlar, doğada, ormanlarda, denizlerde, hatta evlerde bile yaşayabilir." },
+            { question: "teknoloji nedir", answer: "Teknoloji, insan hayatını kolaylaştıran bilimsel bilgi ve araçların birleşimidir." },
+            { question: "yapay zeka nasıl çalışır", answer: "Yapay zeka, verilerden öğrenme ve tahmin yapma süreçlerine dayanır." },
+            { question: "robot nedir", answer: "Robot, belirli görevleri yerine getirebilen makinelerdir." },
+            { question: "şu anda saat kaç", answer: "Üzgünüm, saati bilemiyorum." },
+            { question: "sonraki adım nedir", answer: "Bana sorunuza dair biraz daha bilgi verebilirseniz, yardımcı olmaktan mutluluk duyarım." }
+        ];
+
+        function sendMessage() {
+            const userText = userInput.value.trim();
+
+            if (userText === "") return;
+
+            const userMessage = document.createElement("div");
+            userMessage.classList.add("message", "user");
+            userMessage.textContent = userText;
+            chatBox.appendChild(userMessage);
+
+            userInput.value = "";
+
+            const response = getBotResponse(userText);
+            const botMessage = document.createElement("div");
+            botMessage.classList.add("message", "bot");
+            botMessage.textContent = response;
+            chatBox.appendChild(botMessage);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function getBotResponse(input) {
+            input = input.toLowerCase();
+            const response = responses.find(r => input.includes(r.question));
+            return response ? response.answer : "Bunu şu an anlayamıyorum, başka bir şey sorabilirsiniz!";
+        }
+    </script>
+</body>
+</html>
